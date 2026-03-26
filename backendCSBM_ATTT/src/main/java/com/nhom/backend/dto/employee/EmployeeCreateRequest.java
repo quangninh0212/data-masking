@@ -6,7 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class EmployeeCreateRequest {
-    private String code;
     private String name;
     private String gender;
     private String dateOfBirth;

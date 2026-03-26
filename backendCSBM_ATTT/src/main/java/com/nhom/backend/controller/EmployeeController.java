@@ -29,8 +29,7 @@ public class EmployeeController {
     @PostMapping("/me")
     public ResponseEntity<EmployeeResponse> createMyProfile(
             @RequestAttribute("currentUser") UserEntity currentUser,
-            @RequestBody EmployeeCreateRequest request
-    ) {
+            @RequestBody EmployeeCreateRequest request) {
         return ResponseEntity.ok(employeeService.createProfile(currentUser, request));
     }
 
@@ -42,8 +41,7 @@ public class EmployeeController {
     @PutMapping("/me")
     public ResponseEntity<EmployeeResponse> updateMyProfile(
             @RequestAttribute("currentUser") UserEntity currentUser,
-            @RequestBody EmployeeUpdateRequest request
-    ) {
+            @RequestBody EmployeeUpdateRequest request) {
         return ResponseEntity.ok(employeeService.updateMyProfile(currentUser, request));
     }
 
@@ -55,8 +53,7 @@ public class EmployeeController {
     @GetMapping("/me")
     public ResponseEntity<EmployeeResponse> getMyProfile(
             @RequestAttribute("currentUser") UserEntity currentUser,
-            @RequestHeader(value = "X-Data-Password", required = false) String dataPassword
-    ) {
+            @RequestHeader(value = "X-Data-Password", required = false) String dataPassword) {
         return ResponseEntity.ok(employeeService.getMyProfile(currentUser, dataPassword));
     }
 
@@ -65,8 +62,7 @@ public class EmployeeController {
      */
     @DeleteMapping("/me")
     public ResponseEntity<?> deleteMyProfile(
-            @RequestAttribute("currentUser") UserEntity currentUser
-    ) {
+            @RequestAttribute("currentUser") UserEntity currentUser) {
         employeeService.deleteMyProfile(currentUser);
         return ResponseEntity.ok().body("Deleted successfully");
     }
@@ -78,8 +74,7 @@ public class EmployeeController {
      */
     @GetMapping
     public ResponseEntity<List<EmployeeResponse>> getAll(
-            @RequestHeader(value = "X-Data-Password", required = false) String dataPassword
-    ) {
+            @RequestHeader(value = "X-Data-Password", required = false) String dataPassword) {
         return ResponseEntity.ok(employeeService.getAll(dataPassword));
     }
 
@@ -91,8 +86,28 @@ public class EmployeeController {
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeResponse> getById(
             @PathVariable Long id,
+            @RequestHeader(value = "X-Data-Password", required = false) String dataPassword) {
+        return ResponseEntity.ok(employeeService.getById(id, dataPassword));
+    }
+
+    @PutMapping("/me/change-data-password")
+    public ResponseEntity<?> changeDataPassword(
+            @RequestAttribute("currentUser") UserEntity currentUser,
+            @RequestBody com.nhom.backend.dto.auth.ChangeDataPasswordRequest request) {
+        employeeService.changeDataPassword(
+                currentUser,
+                request.getOldDataPassword(),
+                request.getNewDataPassword());
+        return ResponseEntity.ok("Change data password success");
+    }
+    /**
+     * API: Tìm kiếm nhân viên theo nhiều Feild
+     */
+        @PostMapping("/search")
+    public ResponseEntity<List<EmployeeResponse>> search(
+            @RequestBody com.nhom.backend.dto.employee.EmployeeSearchRequest request,
             @RequestHeader(value = "X-Data-Password", required = false) String dataPassword
     ) {
-        return ResponseEntity.ok(employeeService.getById(id, dataPassword));
+        return ResponseEntity.ok(employeeService.search(request, dataPassword));
     }
 }

@@ -13,4 +13,5 @@ public class FileUploadResponse {
     private String originalFileName;
     private Boolean isEncrypted;
     private String storedPath;
+    private String createdAt;
 }

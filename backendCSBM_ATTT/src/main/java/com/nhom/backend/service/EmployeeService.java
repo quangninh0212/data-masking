@@ -17,54 +17,44 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.nhom.backend.dto.employee.EmployeeSearchRequest;
+import com.nhom.backend.repository.specification.EmployeeSpecification;
+
 @Service
 public class EmployeeService {
 
-    // Repository thao tác DB với bảng employee
     private final EmployeeRepository employeeRepository;
-
-    public EmployeeService(EmployeeRepository employeeRepository) {
+    private final AuditLogService auditLogService;
+    private final EmployeeCodeGeneratorService employeeCodeGeneratorService;
+    private final FileStorageService fileStorageService;
+    public EmployeeService(EmployeeRepository employeeRepository,
+            AuditLogService auditLogService,
+            EmployeeCodeGeneratorService employeeCodeGeneratorService,
+            FileStorageService fileStorageService) {
         this.employeeRepository = employeeRepository;
+        this.auditLogService = auditLogService;
+        this.employeeCodeGeneratorService = employeeCodeGeneratorService;
+        this.fileStorageService = fileStorageService;
     }
 
-    /**
-     * Tạo hồ sơ nhân viên cho user hiện tại
-     */
     public EmployeeResponse createProfile(UserEntity currentUser, EmployeeCreateRequest request) {
 
-        // Kiểm tra user đã có profile chưa (1 user chỉ có 1 employee)
         if (employeeRepository.findByUser(currentUser).isPresent()) {
             throw new BadRequestException("Employee profile already exists");
         }
 
-        // Validate code
-        if (request.getCode() == null || request.getCode().isBlank()) {
-            throw new BadRequestException("Code is required");
-        }
-
-        // Check trùng mã nhân viên
-        if (employeeRepository.existsByCode(request.getCode())) {
-            throw new BadRequestException("Employee code already exists");
-        }
-
-        // Bắt buộc phải có dataPassword (dùng để mã hóa dữ liệu nhạy cảm)
         if (request.getDataPassword() == null || request.getDataPassword().isBlank()) {
             throw new BadRequestException("dataPassword is required");
         }
 
-        // ===== Sinh salt + hash password =====
         byte[] salt = Pbkdf2Core.randomSalt(16);
         String saltBase64 = Base64.getEncoder().encodeToString(salt);
 
-        // Hash password bằng PBKDF2
         String dataPasswordHash = Pbkdf2Core.encodePbkdf2(request.getDataPassword(), salt, 10000, 32);
-
-        // Sinh AES key từ password để mã hóa dữ liệu
         byte[] aesKey = Pbkdf2Core.deriveKey(request.getDataPassword(), salt, 10000, 16);
 
-        // ===== Mapping dữ liệu thường =====
         EmployeeEntity employee = new EmployeeEntity();
-        employee.setCode(request.getCode());
+        employee.setCode(employeeCodeGeneratorService.generateNextCode());
         employee.setName(request.getName());
         employee.setGender(request.getGender());
         employee.setDateOfBirth(request.getDateOfBirth());
@@ -76,37 +66,33 @@ public class EmployeeService {
         employee.setGraduationYear(request.getGraduationYear());
         employee.setEducation(request.getEducation());
 
-        // ===== Mã hóa dữ liệu nhạy cảm =====
         applyEncryptedFields(employee, request, aesKey);
 
-        // Lưu thông tin bảo mật
         employee.setDataSalt(saltBase64);
         employee.setDataPasswordHash(dataPasswordHash);
 
-        // Thời gian tạo / cập nhật
         employee.setCreatedAt(LocalDateTime.now().toString());
         employee.setUpdatedAt(LocalDateTime.now().toString());
 
-        // Liên kết với user
         employee.setUser(currentUser);
 
-        // Lưu DB
         EmployeeEntity saved = employeeRepository.save(employee);
 
-        // Trả response (có thể decrypt nếu có password)
+        auditLogService.save(
+                currentUser.getUsername(),
+                "CREATE",
+                "EMPLOYEE",
+                saved.getId(),
+                "Create employee profile with code: " + saved.getCode());
+
         return toResponse(saved, request.getDataPassword());
     }
 
-    /**
-     * Cập nhật hồ sơ của chính user
-     */
     public EmployeeResponse updateMyProfile(UserEntity currentUser, EmployeeUpdateRequest request) {
 
-        // Lấy employee theo user
         EmployeeEntity employee = employeeRepository.findByUser(currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee profile not found"));
 
-        // Kiểm tra password để giải mã
         if (request.getDataPassword() == null || request.getDataPassword().isBlank()) {
             throw new BadRequestException("dataPassword is required");
         }
@@ -115,11 +101,9 @@ public class EmployeeService {
             throw new BadRequestException("Data password is incorrect");
         }
 
-        // Lấy lại AES key từ salt đã lưu
         byte[] salt = Base64.getDecoder().decode(employee.getDataSalt());
         byte[] aesKey = Pbkdf2Core.deriveKey(request.getDataPassword(), salt, 10000, 16);
 
-        // Nếu đổi code thì check trùng
         if (request.getCode() != null && !request.getCode().equals(employee.getCode())) {
             if (employeeRepository.existsByCode(request.getCode())) {
                 throw new BadRequestException("Employee code already exists");
@@ -127,7 +111,6 @@ public class EmployeeService {
             employee.setCode(request.getCode());
         }
 
-        // Update dữ liệu thường
         employee.setName(request.getName());
         employee.setGender(request.getGender());
         employee.setDateOfBirth(request.getDateOfBirth());
@@ -139,20 +122,22 @@ public class EmployeeService {
         employee.setGraduationYear(request.getGraduationYear());
         employee.setEducation(request.getEducation());
 
-        // Mã hóa lại dữ liệu nhạy cảm
         applyEncryptedFields(employee, request, aesKey);
 
-        // Update thời gian
         employee.setUpdatedAt(LocalDateTime.now().toString());
 
         EmployeeEntity saved = employeeRepository.save(employee);
 
+        auditLogService.save(
+                currentUser.getUsername(),
+                "UPDATE",
+                "EMPLOYEE",
+                saved.getId(),
+                "Update employee profile");
+
         return toResponse(saved, request.getDataPassword());
     }
 
-    /**
-     * Lấy profile của chính mình
-     */
     public EmployeeResponse getMyProfile(UserEntity currentUser, String dataPassword) {
         EmployeeEntity employee = employeeRepository.findByUser(currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee profile not found"));
@@ -160,9 +145,6 @@ public class EmployeeService {
         return toResponse(employee, dataPassword);
     }
 
-    /**
-     * Lấy danh sách tất cả employee
-     */
     public List<EmployeeResponse> getAll(String dataPassword) {
         return employeeRepository.findAll()
                 .stream()
@@ -170,9 +152,6 @@ public class EmployeeService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Lấy employee theo ID
-     */
     public EmployeeResponse getById(Long id, String dataPassword) {
         EmployeeEntity employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
@@ -180,16 +159,21 @@ public class EmployeeService {
         return toResponse(employee, dataPassword);
     }
 
-    /**
-     * Xóa hồ sơ employee của user hiện tại
-     * ⚠️ CHỈ xóa bảng employee
-     * ❌ KHÔNG xóa user (tài khoản login vẫn còn)
-     */
     public void deleteMyProfile(UserEntity currentUser) {
         EmployeeEntity employee = employeeRepository.findByUser(currentUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee profile not found"));
 
+        Long employeeId = employee.getId();
+        String employeeCode = employee.getCode();
+
         employeeRepository.delete(employee);
+
+        auditLogService.save(
+                currentUser.getUsername(),
+                "DELETE",
+                "EMPLOYEE",
+                employeeId,
+                "Delete employee profile with code: " + employeeCode);
     }
 
     private void applyEncryptedFields(EmployeeEntity employee, EmployeeCreateRequest request, byte[] aesKey) {
@@ -197,7 +181,8 @@ public class EmployeeService {
         employee.setTaxCodeEnc(CryptoFieldUtil.encryptString(request.getTaxCode(), aesKey));
         employee.setSocialInsuranceCodeEnc(CryptoFieldUtil.encryptString(request.getSocialInsuranceCode(), aesKey));
         employee.setPhoneNumberEnc(CryptoFieldUtil.encryptString(request.getPhoneNumber(), aesKey));
-        employee.setCitizenIdentificationCodeEnc(CryptoFieldUtil.encryptString(request.getCitizenIdentificationCode(), aesKey));
+        employee.setCitizenIdentificationCodeEnc(
+                CryptoFieldUtil.encryptString(request.getCitizenIdentificationCode(), aesKey));
         employee.setPersonalEmailEnc(CryptoFieldUtil.encryptString(request.getPersonalEmail(), aesKey));
         employee.setBirthplaceEnc(CryptoFieldUtil.encryptString(request.getBirthplace(), aesKey));
         employee.setCurrentAddressEnc(CryptoFieldUtil.encryptString(request.getCurrentAddress(), aesKey));
@@ -211,7 +196,8 @@ public class EmployeeService {
         employee.setTaxCodeEnc(CryptoFieldUtil.encryptString(request.getTaxCode(), aesKey));
         employee.setSocialInsuranceCodeEnc(CryptoFieldUtil.encryptString(request.getSocialInsuranceCode(), aesKey));
         employee.setPhoneNumberEnc(CryptoFieldUtil.encryptString(request.getPhoneNumber(), aesKey));
-        employee.setCitizenIdentificationCodeEnc(CryptoFieldUtil.encryptString(request.getCitizenIdentificationCode(), aesKey));
+        employee.setCitizenIdentificationCodeEnc(
+                CryptoFieldUtil.encryptString(request.getCitizenIdentificationCode(), aesKey));
         employee.setPersonalEmailEnc(CryptoFieldUtil.encryptString(request.getPersonalEmail(), aesKey));
         employee.setBirthplaceEnc(CryptoFieldUtil.encryptString(request.getBirthplace(), aesKey));
         employee.setCurrentAddressEnc(CryptoFieldUtil.encryptString(request.getCurrentAddress(), aesKey));
@@ -247,9 +233,11 @@ public class EmployeeService {
 
             response.setEmail(CryptoFieldUtil.decryptString(employee.getEmailEnc(), aesKey));
             response.setTaxCode(CryptoFieldUtil.decryptString(employee.getTaxCodeEnc(), aesKey));
-            response.setSocialInsuranceCode(CryptoFieldUtil.decryptString(employee.getSocialInsuranceCodeEnc(), aesKey));
+            response.setSocialInsuranceCode(
+                    CryptoFieldUtil.decryptString(employee.getSocialInsuranceCodeEnc(), aesKey));
             response.setPhoneNumber(CryptoFieldUtil.decryptString(employee.getPhoneNumberEnc(), aesKey));
-            response.setCitizenIdentificationCode(CryptoFieldUtil.decryptString(employee.getCitizenIdentificationCodeEnc(), aesKey));
+            response.setCitizenIdentificationCode(
+                    CryptoFieldUtil.decryptString(employee.getCitizenIdentificationCodeEnc(), aesKey));
             response.setPersonalEmail(CryptoFieldUtil.decryptString(employee.getPersonalEmailEnc(), aesKey));
             response.setBirthplace(CryptoFieldUtil.decryptString(employee.getBirthplaceEnc(), aesKey));
             response.setCurrentAddress(CryptoFieldUtil.decryptString(employee.getCurrentAddressEnc(), aesKey));
@@ -272,4 +260,80 @@ public class EmployeeService {
 
         return response;
     }
+
+    public void changeDataPassword(UserEntity currentUser, String oldDataPassword, String newDataPassword) {
+        EmployeeEntity employee = employeeRepository.findByUser(currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee profile not found"));
+
+        if (oldDataPassword == null || oldDataPassword.isBlank()) {
+            throw new BadRequestException("Old data password is required");
+        }
+        if (newDataPassword == null || newDataPassword.isBlank()) {
+            throw new BadRequestException("New data password is required");
+        }
+
+        if (!Pbkdf2Core.verifyPassword(oldDataPassword, employee.getDataPasswordHash())) {
+            throw new BadRequestException("Old data password is incorrect");
+        }
+
+        try {
+            byte[] salt = Base64.getDecoder().decode(employee.getDataSalt());
+            byte[] oldAesKey = Pbkdf2Core.deriveKey(oldDataPassword, salt, 10000, 16);
+
+            String email = CryptoFieldUtil.decryptString(employee.getEmailEnc(), oldAesKey);
+            String taxCode = CryptoFieldUtil.decryptString(employee.getTaxCodeEnc(), oldAesKey);
+            String socialInsuranceCode = CryptoFieldUtil.decryptString(employee.getSocialInsuranceCodeEnc(), oldAesKey);
+            String phoneNumber = CryptoFieldUtil.decryptString(employee.getPhoneNumberEnc(), oldAesKey);
+            String citizenIdentificationCode = CryptoFieldUtil.decryptString(employee.getCitizenIdentificationCodeEnc(),
+                    oldAesKey);
+            String personalEmail = CryptoFieldUtil.decryptString(employee.getPersonalEmailEnc(), oldAesKey);
+            String birthplace = CryptoFieldUtil.decryptString(employee.getBirthplaceEnc(), oldAesKey);
+            String currentAddress = CryptoFieldUtil.decryptString(employee.getCurrentAddressEnc(), oldAesKey);
+            String permanentAddress = CryptoFieldUtil.decryptString(employee.getPermanentAddressEnc(), oldAesKey);
+            String bankName = CryptoFieldUtil.decryptString(employee.getBankNameEnc(), oldAesKey);
+            String bankAccountNumber = CryptoFieldUtil.decryptString(employee.getBankAccountNumberEnc(), oldAesKey);
+
+            // re-encrypt file trước
+            fileStorageService.reEncryptAllFiles(employee, oldDataPassword, newDataPassword);
+
+            // dữ liệu employee dùng cùng salt, chỉ đổi password
+            byte[] newAesKey = Pbkdf2Core.deriveKey(newDataPassword, salt, 10000, 16);
+            String newHash = Pbkdf2Core.encodePbkdf2(newDataPassword, salt, 10000, 32);
+
+            employee.setEmailEnc(CryptoFieldUtil.encryptString(email, newAesKey));
+            employee.setTaxCodeEnc(CryptoFieldUtil.encryptString(taxCode, newAesKey));
+            employee.setSocialInsuranceCodeEnc(CryptoFieldUtil.encryptString(socialInsuranceCode, newAesKey));
+            employee.setPhoneNumberEnc(CryptoFieldUtil.encryptString(phoneNumber, newAesKey));
+            employee.setCitizenIdentificationCodeEnc(
+                    CryptoFieldUtil.encryptString(citizenIdentificationCode, newAesKey));
+            employee.setPersonalEmailEnc(CryptoFieldUtil.encryptString(personalEmail, newAesKey));
+            employee.setBirthplaceEnc(CryptoFieldUtil.encryptString(birthplace, newAesKey));
+            employee.setCurrentAddressEnc(CryptoFieldUtil.encryptString(currentAddress, newAesKey));
+            employee.setPermanentAddressEnc(CryptoFieldUtil.encryptString(permanentAddress, newAesKey));
+            employee.setBankNameEnc(CryptoFieldUtil.encryptString(bankName, newAesKey));
+            employee.setBankAccountNumberEnc(CryptoFieldUtil.encryptString(bankAccountNumber, newAesKey));
+
+            employee.setDataPasswordHash(newHash);
+            employee.setUpdatedAt(LocalDateTime.now().toString());
+
+            employeeRepository.save(employee);
+
+            auditLogService.save(
+                    currentUser.getUsername(),
+                    "CHANGE_DATA_PASSWORD",
+                    "EMPLOYEE",
+                    employee.getId(),
+                    "Change shared data password for employee data and files");
+        } catch (Exception e) {
+            throw new BadRequestException("Change data password failed: " + e.getMessage());
+        }
+    }
+
+    public List<EmployeeResponse> search(EmployeeSearchRequest request, String dataPassword) {
+        return employeeRepository.findAll(EmployeeSpecification.build(request))
+                .stream()
+                .map(e -> toResponse(e, dataPassword))
+                .collect(Collectors.toList());
+    }
+
 }

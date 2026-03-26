@@ -1,5 +1,6 @@
 package com.nhom.backend.service;
 
+import com.nhom.backend.dto.file.FileDecryptResponse;
 import com.nhom.backend.dto.file.FileUploadResponse;
 import com.nhom.backend.entity.EmployeeEntity;
 import com.nhom.backend.entity.FileUploadEntity;
@@ -9,11 +10,15 @@ import com.nhom.backend.exception.ResourceNotFoundException;
 import com.nhom.backend.repository.EmployeeRepository;
 import com.nhom.backend.repository.FileUploadRepository;
 import com.nhom.backend.util.AesCore;
+import com.nhom.backend.util.CryptoFieldUtil;
 import com.nhom.backend.util.Pbkdf2Core;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.Base64;
@@ -24,6 +29,7 @@ public class FileStorageService {
 
     private final EmployeeRepository employeeRepository;
     private final FileUploadRepository fileUploadRepository;
+    private final AuditLogService auditLogService;
 
     @Value("${app.upload-dir}")
     private String uploadDir;
@@ -35,33 +41,33 @@ public class FileStorageService {
     private String decryptedDir;
 
     public FileStorageService(EmployeeRepository employeeRepository,
-                              FileUploadRepository fileUploadRepository) {
+            FileUploadRepository fileUploadRepository,
+            AuditLogService auditLogService) {
         this.employeeRepository = employeeRepository;
         this.fileUploadRepository = fileUploadRepository;
+        this.auditLogService = auditLogService;
     }
 
     public FileUploadResponse upload(UserEntity currentUser, MultipartFile file, String dataPassword) throws Exception {
-        EmployeeEntity employee = employeeRepository.findByUser(currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee profile not found"));
-
-        if (!Pbkdf2Core.verifyPassword(dataPassword, employee.getDataPasswordHash())) {
-            throw new BadRequestException("Data password is incorrect");
-        }
+        EmployeeEntity employee = getEmployeeByUser(currentUser);
+        verifyDataPassword(employee, dataPassword);
 
         Files.createDirectories(Paths.get(uploadDir));
         Files.createDirectories(Paths.get(encryptedDir));
 
-        byte[] salt = Base64.getDecoder().decode(employee.getDataSalt());
-        byte[] aesKey = Pbkdf2Core.deriveKey(dataPassword, salt, 10000, 16);
+        byte[] aesKey = getAesKey(employee, dataPassword);
 
         String originalFileName = file.getOriginalFilename();
+        if (originalFileName == null || originalFileName.isBlank()) {
+            originalFileName = "unknown.bin";
+        }
+
         String rawName = System.currentTimeMillis() + "_" + originalFileName;
         Path rawPath = Paths.get(uploadDir, rawName);
         Files.copy(file.getInputStream(), rawPath, StandardCopyOption.REPLACE_EXISTING);
 
         String encryptedName = rawName + ".enc";
         Path encryptedPath = Paths.get(encryptedDir, encryptedName);
-
         AesCore.encryptFile(rawPath, encryptedPath, aesKey);
 
         FileUploadEntity entity = new FileUploadEntity();
@@ -75,46 +81,135 @@ public class FileStorageService {
 
         FileUploadEntity saved = fileUploadRepository.save(entity);
 
+        auditLogService.save(
+                currentUser.getUsername(),
+                "UPLOAD_FILE",
+                "FILE",
+                saved.getId(),
+                "Upload encrypted file: " + originalFileName);
+
         return new FileUploadResponse(
                 saved.getId(),
                 saved.getFileName(),
                 saved.getOriginalFileName(),
                 saved.getIsEncrypted(),
-                saved.getStoredPath()
-        );
+                saved.getStoredPath(),
+                saved.getCreatedAt());
     }
 
     public List<FileUploadEntity> getMyFiles(UserEntity currentUser) {
-        EmployeeEntity employee = employeeRepository.findByUser(currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee profile not found"));
+        EmployeeEntity employee = getEmployeeByUser(currentUser);
         return fileUploadRepository.findByEmployee(employee);
     }
 
-    public String decryptFile(UserEntity currentUser, Long fileId, String dataPassword) throws Exception {
-        EmployeeEntity employee = employeeRepository.findByUser(currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee profile not found"));
-
-        FileUploadEntity fileUpload = fileUploadRepository.findById(fileId)
+    public FileUploadEntity getMyFileDetail(UserEntity currentUser, Long fileId) {
+        EmployeeEntity employee = getEmployeeByUser(currentUser);
+        return fileUploadRepository.findByIdAndEmployee(fileId, employee)
                 .orElseThrow(() -> new ResourceNotFoundException("File not found"));
+    }
 
-        if (!fileUpload.getEmployee().getId().equals(employee.getId())) {
-            throw new BadRequestException("You cannot access this file");
-        }
+    public FileDecryptResponse decryptFile(UserEntity currentUser, Long fileId, String dataPassword) throws Exception {
+        EmployeeEntity employee = getEmployeeByUser(currentUser);
+        verifyDataPassword(employee, dataPassword);
 
-        if (!Pbkdf2Core.verifyPassword(dataPassword, employee.getDataPasswordHash())) {
-            throw new BadRequestException("Data password is incorrect");
-        }
+        FileUploadEntity fileUpload = fileUploadRepository.findByIdAndEmployee(fileId, employee)
+                .orElseThrow(() -> new ResourceNotFoundException("File not found"));
 
         Files.createDirectories(Paths.get(decryptedDir));
 
-        byte[] salt = Base64.getDecoder().decode(employee.getDataSalt());
-        byte[] aesKey = Pbkdf2Core.deriveKey(dataPassword, salt, 10000, 16);
-
+        byte[] aesKey = getAesKey(employee, dataPassword);
         Path inputPath = Paths.get(fileUpload.getStoredPath());
         Path outputPath = Paths.get(decryptedDir, "decrypted_" + fileUpload.getOriginalFileName());
 
         AesCore.decryptFile(inputPath, outputPath, aesKey);
 
-        return outputPath.toString();
+        auditLogService.save(
+                currentUser.getUsername(),
+                "DECRYPT_FILE",
+                "FILE",
+                fileUpload.getId(),
+                "Decrypt file: " + fileUpload.getOriginalFileName());
+
+        return new FileDecryptResponse(fileId, outputPath.toString(), "Decrypt success");
+    }
+
+    public Resource downloadDecryptedFile(UserEntity currentUser, Long fileId, String dataPassword) throws Exception {
+        FileDecryptResponse decryptResponse = decryptFile(currentUser, fileId, dataPassword);
+        Path outputPath = Paths.get(decryptResponse.getOutputPath());
+
+        if (!Files.exists(outputPath)) {
+            throw new ResourceNotFoundException("Decrypted file not found");
+        }
+
+        return new FileSystemResource(outputPath);
+    }
+
+    public void deleteMyFile(UserEntity currentUser, Long fileId) throws Exception {
+        EmployeeEntity employee = getEmployeeByUser(currentUser);
+        FileUploadEntity fileUpload = fileUploadRepository.findByIdAndEmployee(fileId, employee)
+                .orElseThrow(() -> new ResourceNotFoundException("File not found"));
+
+        Path encryptedPath = Paths.get(fileUpload.getStoredPath());
+        Files.deleteIfExists(encryptedPath);
+
+        fileUploadRepository.delete(fileUpload);
+
+        auditLogService.save(
+                currentUser.getUsername(),
+                "DELETE_FILE",
+                "FILE",
+                fileId,
+                "Delete file: " + fileUpload.getOriginalFileName());
+    }
+
+    private EmployeeEntity getEmployeeByUser(UserEntity currentUser) {
+        return employeeRepository.findByUser(currentUser)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee profile not found"));
+    }
+
+    private void verifyDataPassword(EmployeeEntity employee, String dataPassword) {
+        if (dataPassword == null || dataPassword.isBlank()) {
+            throw new BadRequestException("dataPassword is required");
+        }
+        if (!Pbkdf2Core.verifyPassword(dataPassword, employee.getDataPasswordHash())) {
+            throw new BadRequestException("Data password is incorrect");
+        }
+    }
+
+    private byte[] getAesKey(EmployeeEntity employee, String dataPassword) {
+        byte[] salt = Base64.getDecoder().decode(employee.getDataSalt());
+        return Pbkdf2Core.deriveKey(dataPassword, salt, 10000, 16);
+    }
+
+    public void reEncryptAllFiles(EmployeeEntity employee, String oldDataPassword, String newDataPassword)
+            throws Exception {
+        List<FileUploadEntity> files = fileUploadRepository.findByEmployee(employee);
+
+        byte[] salt = Base64.getDecoder().decode(employee.getDataSalt());
+        byte[] oldAesKey = Pbkdf2Core.deriveKey(oldDataPassword, salt, 10000, 16);
+
+        byte[] newAesKey = Pbkdf2Core.deriveKey(newDataPassword, salt, 10000, 16);
+
+        Files.createDirectories(Paths.get(decryptedDir));
+        Files.createDirectories(Paths.get(encryptedDir));
+
+        for (FileUploadEntity file : files) {
+            Path encryptedPath = Paths.get(file.getStoredPath());
+            if (!Files.exists(encryptedPath)) {
+                continue;
+            }
+
+            Path tempDecrypted = Paths.get(decryptedDir, "temp_" + file.getOriginalFileName());
+            Path tempReEncrypted = Paths.get(encryptedDir, "reencrypted_" + file.getFileName());
+
+            AesCore.decryptFile(encryptedPath, tempDecrypted, oldAesKey);
+            AesCore.encryptFile(tempDecrypted, tempReEncrypted, newAesKey);
+
+            Files.move(tempReEncrypted, encryptedPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.deleteIfExists(tempDecrypted);
+
+            file.setUpdatedAt(LocalDateTime.now().toString());
+            fileUploadRepository.save(file);
+        }
     }
 }

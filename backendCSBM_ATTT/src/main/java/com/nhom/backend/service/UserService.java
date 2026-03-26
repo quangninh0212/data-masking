@@ -9,9 +9,12 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+            AuditLogService auditLogService) {
         this.userRepository = userRepository;
+        this.auditLogService = auditLogService;
     }
 
     public UserEntity register(RegisterRequest request) {
@@ -28,7 +31,14 @@ public class UserService {
         UserEntity user = new UserEntity();
         user.setUsername(request.getUsername());
         user.setPassword(request.getPassword());
-
-        return userRepository.save(user);
+        UserEntity savedUser = userRepository.save(user);
+        auditLogService.save(
+                savedUser.getUsername(),
+                "REGISTER",
+                "USER",
+                savedUser.getId(),
+                "Register new account");
+        return savedUser;
     }
+
 }

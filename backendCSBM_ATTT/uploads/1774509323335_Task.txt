@@ -1,0 +1,9 @@
+Update Customer pending ok!
+approved status ... ok!
+Update Building pending ...
+update repository ok!
+transaction customer
+error
+notice
+Save image
+Web user
