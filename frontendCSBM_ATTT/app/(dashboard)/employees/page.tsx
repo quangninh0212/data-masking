@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { KeyRound } from 'lucide-react';
 import PageTitle from '../../components/common/page-title';
 import Loading from '../../components/common/loading';
 import EmployeeSearchForm from '../../components/employee/employee-search-form';
@@ -63,39 +64,53 @@ export default function EmployeesPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageTitle
         title="Danh sách nhân viên"
-        subtitle="Xem danh sách, tìm kiếm và mở chi tiết nhân viên"
+        subtitle="Quản lý truy cập dữ liệu hồ sơ, tìm kiếm nhân viên và mở trang chi tiết."
       />
 
-      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="flex flex-col gap-3 md:flex-row md:items-end">
-          <div className="flex-1">
-            <label className="mb-1 block text-sm font-medium">
-              Data password
-            </label>
-            <input
-              type="password"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
-              value={dataPasswordInput}
-              onChange={(e) => setDataPasswordInput(e.target.value)}
-              placeholder="Nhập để giải che dữ liệu"
-            />
+      <div className="rounded-[28px] border border-sky-400/15 bg-[linear-gradient(135deg,rgba(14,165,233,0.12),rgba(15,23,42,0.6)_45%,rgba(15,23,42,0.9))] p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">
+              <KeyRound size={14} />
+              Data Access Control
+            </div>
+            <h2 className="mt-4 text-xl font-semibold text-white">
+              Lưu data password để mở khóa dữ liệu hồ sơ
+            </h2>
+            <p className="mt-2 text-sm leading-7 text-slate-300">
+              Nếu key đúng, backend có thể trả về dữ liệu thật và trường
+              <span className="mx-1 font-semibold text-sky-300">unlocked</span>
+              sẽ là true.
+            </p>
           </div>
 
-          <button
-            onClick={handleSaveDataPassword}
-            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
-          >
-            Lưu data password
-          </button>
-        </div>
+          <div className="w-full max-w-xl">
+            <div className="flex flex-col gap-3 md:flex-row md:items-end">
+              <div className="flex-1">
+                <label className="mb-2 block text-sm font-medium text-slate-300">
+                  Data password
+                </label>
+                <input
+                  type="password"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-sky-400/50 focus:ring-2 focus:ring-sky-400/15"
+                  value={dataPasswordInput}
+                  onChange={(e) => setDataPasswordInput(e.target.value)}
+                  placeholder="Nhập để giải che dữ liệu"
+                />
+              </div>
 
-        <p className="mt-2 text-xs text-slate-500">
-          Nếu data password đúng, backend có thể trả dữ liệu đã mở khóa
-          và trường `unlocked` sẽ là true.
-        </p>
+              <button
+                onClick={handleSaveDataPassword}
+                className="rounded-2xl bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+              >
+                Lưu data password
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <EmployeeSearchForm
@@ -105,7 +120,7 @@ export default function EmployeesPage() {
       />
 
       {error ? (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-2xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">
           {error}
         </div>
       ) : null}

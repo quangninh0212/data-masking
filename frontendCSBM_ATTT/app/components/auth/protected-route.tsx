@@ -37,7 +37,7 @@ export default function ProtectedRoute({
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-white p-6 text-sm text-slate-500">
+      <div className="rounded-[24px] border border-white/10 bg-white/[0.04] p-6 text-sm text-slate-400">
         Đang kiểm tra đăng nhập...
       </div>
     );

@@ -47,48 +47,53 @@ export default function UserForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+      className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
     >
-      <h2 className="mb-5 text-lg font-semibold text-slate-900">
-        {mode === 'create' ? 'Tạo user mới' : 'Cập nhật user'}
-      </h2>
+      <div className="mb-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          User Form
+        </p>
+        <h2 className="mt-2 text-xl font-semibold text-white">
+          {mode === 'create' ? 'Tạo user mới' : 'Cập nhật user'}
+        </h2>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-medium text-slate-300">
             Username
           </label>
           <input
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none focus:border-sky-400/50"
             placeholder="Nhập username"
           />
         </div>
 
         {mode === 'create' ? (
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-slate-300">
               Password
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none focus:border-sky-400/50"
               placeholder="Nhập password"
             />
           </div>
         ) : null}
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-medium text-slate-300">
             Role
           </label>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none"
           >
             {ROLE_OPTIONS.map((item) => (
               <option key={item} value={item}>
@@ -100,13 +105,13 @@ export default function UserForm({
 
         {mode === 'update' ? (
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-slate-300">
               Trạng thái
             </label>
             <select
               value={active ? 'true' : 'false'}
               onChange={(e) => setActive(e.target.value === 'true')}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none"
             >
               <option value="true">Active</option>
               <option value="false">Inactive</option>
@@ -119,7 +124,7 @@ export default function UserForm({
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+          className="rounded-2xl bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:opacity-60"
         >
           {loading
             ? 'Đang xử lý...'

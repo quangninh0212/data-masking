@@ -37,65 +37,154 @@ export default function Sidebar() {
     pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <aside className="hidden min-h-screen w-72 border-r border-slate-200 bg-white xl:block">
-      <div className="border-b border-slate-200 px-5 py-5">
-        <h2 className="text-xl font-bold text-slate-900">CSBM & ATTT</h2>
-        <p className="mt-1 text-sm text-slate-500">Management System</p>
-      </div>
+    <aside className="hidden min-h-screen w-80 border-r border-white/10 bg-[#08111f]/95 xl:block">
+      <div className="flex min-h-screen flex-col px-5 py-6">
+        <div className="panel-dark-strong rounded-3xl px-5 py-5">
+          <div className="mb-4 inline-flex rounded-2xl border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">
+            Security Console
+          </div>
 
-      <div className="p-4">
-        <nav className="space-y-2">
-          {menu.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href);
+          <h2 className="title-glow text-2xl font-bold text-white">
+            CSBM & ATTT
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-400">
+            Employee, file, access control and audit monitoring dashboard.
+          </p>
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition',
-                  active
-                    ? 'bg-slate-900 text-white'
-                    : 'text-slate-700 hover:bg-slate-100'
-                )}
-              >
-                <Icon size={18} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-
-          {isAdmin ? (
-            <>
-              <div className="my-4 border-t border-slate-200" />
-              <p className="px-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Admin
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+              <p className="text-xs uppercase tracking-wide text-slate-500">
+                Access
               </p>
+              <p className="mt-1 text-sm font-semibold text-slate-100">
+                Protected
+              </p>
+            </div>
 
-              {adminMenu.map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.href);
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+              <p className="text-xs uppercase tracking-wide text-slate-500">
+                Mode
+              </p>
+              <p className="mt-1 text-sm font-semibold text-slate-100">
+                Secure
+              </p>
+            </div>
+          </div>
+        </div>
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
+        <div className="mt-6 flex-1">
+          <p className="mb-3 px-2 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+            Navigation
+          </p>
+
+          <nav className="space-y-2">
+            {menu.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.href);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    'group flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-sm transition-all duration-200',
+                    active
+                      ? 'border-sky-400/30 bg-sky-400/15 text-white shadow-[0_0_30px_rgba(56,189,248,0.12)]'
+                      : 'border-transparent bg-transparent text-slate-300 hover:border-white/10 hover:bg-white/5 hover:text-white'
+                  )}
+                >
+                  <span
                     className={cn(
-                      'flex items-center gap-3 rounded-xl px-4 py-3 text-sm transition',
+                      'flex h-10 w-10 items-center justify-center rounded-xl transition',
                       active
-                        ? 'bg-slate-900 text-white'
-                        : 'text-slate-700 hover:bg-slate-100'
+                        ? 'bg-sky-400/20 text-sky-300'
+                        : 'bg-white/5 text-slate-400 group-hover:bg-white/10 group-hover:text-slate-200'
                     )}
                   >
                     <Icon size={18} />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </>
+                  </span>
+
+                  <div>
+                    <p className="font-medium">{item.label}</p>
+                    <p
+                      className={cn(
+                        'text-xs',
+                        active ? 'text-sky-200/80' : 'text-slate-500'
+                      )}
+                    >
+                      Truy cập nhanh
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {isAdmin ? (
+            <div className="mt-7">
+              <div className="mb-3 flex items-center gap-3 px-2">
+                <div className="h-px flex-1 bg-white/10" />
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  Admin
+                </p>
+                <div className="h-px flex-1 bg-white/10" />
+              </div>
+
+              <nav className="space-y-2">
+                {adminMenu.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href);
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={cn(
+                        'group flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-sm transition-all duration-200',
+                        active
+                          ? 'border-violet-400/30 bg-violet-400/15 text-white shadow-[0_0_30px_rgba(167,139,250,0.12)]'
+                          : 'border-transparent bg-transparent text-slate-300 hover:border-white/10 hover:bg-white/5 hover:text-white'
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'flex h-10 w-10 items-center justify-center rounded-xl transition',
+                          active
+                            ? 'bg-violet-400/20 text-violet-300'
+                            : 'bg-white/5 text-slate-400 group-hover:bg-white/10 group-hover:text-slate-200'
+                        )}
+                      >
+                        <Icon size={18} />
+                      </span>
+
+                      <div>
+                        <p className="font-medium">{item.label}</p>
+                        <p
+                          className={cn(
+                            'text-xs',
+                            active ? 'text-violet-200/80' : 'text-slate-500'
+                          )}
+                        >
+                          Khu vực quản trị
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
           ) : null}
-        </nav>
+        </div>
+
+        <div className="panel-dark mt-6 rounded-3xl px-4 py-4">
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+            Signed in
+          </p>
+          <p className="mt-2 text-sm font-semibold text-slate-100">
+            {user?.username || 'User'}
+          </p>
+          <p className="mt-1 text-xs text-slate-400">{user?.role || 'UNKNOWN'}</p>
+        </div>
       </div>
     </aside>
   );

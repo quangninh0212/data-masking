@@ -24,12 +24,20 @@ export default function ChangeDataPasswordForm({ loading, onSubmit }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="mb-5 text-lg font-semibold text-slate-900">Đổi data password</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+    >
+      <div className="mb-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          Password Rotation
+        </p>
+        <h2 className="mt-2 text-xl font-semibold text-white">Đổi data password</h2>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-medium text-slate-300">
             Data password cũ
           </label>
           <input
@@ -38,12 +46,12 @@ export default function ChangeDataPasswordForm({ loading, onSubmit }: Props) {
             onChange={(e) =>
               setForm((prev) => ({ ...prev, oldDataPassword: e.target.value }))
             }
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none focus:border-sky-400/50"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-medium text-slate-300">
             Data password mới
           </label>
           <input
@@ -52,7 +60,7 @@ export default function ChangeDataPasswordForm({ loading, onSubmit }: Props) {
             onChange={(e) =>
               setForm((prev) => ({ ...prev, newDataPassword: e.target.value }))
             }
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none focus:border-sky-400/50"
           />
         </div>
       </div>
@@ -61,7 +69,7 @@ export default function ChangeDataPasswordForm({ loading, onSubmit }: Props) {
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+          className="rounded-2xl bg-violet-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-400 disabled:opacity-60"
         >
           {loading ? 'Đang đổi...' : 'Đổi data password'}
         </button>

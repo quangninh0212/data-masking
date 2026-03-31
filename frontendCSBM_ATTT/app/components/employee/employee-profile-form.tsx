@@ -86,15 +86,39 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-slate-700">{label}</label>
+      <label className="mb-2 block text-sm font-medium text-slate-300">
+        {label}
+      </label>
       <input
         type={type}
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-slate-300 px-3 py-2 disabled:bg-slate-100"
+        className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500 disabled:opacity-60 focus:border-sky-400/50"
       />
+    </div>
+  );
+}
+
+function Section({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-[24px] border border-white/10 bg-white/[0.03] p-5">
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-white">{title}</h3>
+        {subtitle ? (
+          <p className="mt-1 text-sm leading-6 text-slate-400">{subtitle}</p>
+        ) : null}
+      </div>
+      {children}
     </div>
   );
 }
@@ -184,66 +208,165 @@ export default function EmployeeProfileForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="mb-5 text-lg font-semibold text-slate-900">{title}</h2>
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+    >
+      <div className="mb-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          Profile Form
+        </p>
+        <h2 className="mt-2 text-xl font-semibold text-white">{title}</h2>
+      </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <Field
-          label="Mã nhân viên"
-          value={form.code}
-          onChange={(v) => setField('code', v)}
-          placeholder="Nếu backend tự sinh có thể để trống"
-          disabled={mode === 'create'}
-        />
-        <Field label="Họ tên" value={form.name} onChange={(v) => setField('name', v)} />
-        <Field label="Giới tính" value={form.gender} onChange={(v) => setField('gender', v)} />
-        <Field label="Ngày sinh" value={form.dateOfBirth} onChange={(v) => setField('dateOfBirth', v)} placeholder="YYYY-MM-DD" />
-        <Field
-          label="Probationary start"
-          value={form.probationaryStartDate}
-          onChange={(v) => setField('probationaryStartDate', v)}
-          placeholder="YYYY-MM-DD"
-        />
-        <Field
-          label="Probationary end"
-          value={form.probationaryEndDate}
-          onChange={(v) => setField('probationaryEndDate', v)}
-          placeholder="YYYY-MM-DD"
-        />
-        <Field
-          label="Official start"
-          value={form.officialStartDate}
-          onChange={(v) => setField('officialStartDate', v)}
-          placeholder="YYYY-MM-DD"
-        />
-        <Field label="Loại" value={form.type} onChange={(v) => setField('type', v)} />
-        <Field label="Level" value={form.level} onChange={(v) => setField('level', v)} />
-        <Field label="Năm tốt nghiệp" value={form.graduationYear} onChange={(v) => setField('graduationYear', v)} />
-        <Field label="Học vấn" value={form.education} onChange={(v) => setField('education', v)} />
-        <Field label="Email công ty" value={form.email} onChange={(v) => setField('email', v)} />
-        <Field label="Mã số thuế" value={form.taxCode} onChange={(v) => setField('taxCode', v)} />
-        <Field label="Mã BHXH" value={form.socialInsuranceCode} onChange={(v) => setField('socialInsuranceCode', v)} />
-        <Field label="Số điện thoại" value={form.phoneNumber} onChange={(v) => setField('phoneNumber', v)} />
-        <Field
-          label="CCCD"
-          value={form.citizenIdentificationCode}
-          onChange={(v) => setField('citizenIdentificationCode', v)}
-        />
-        <Field label="Email cá nhân" value={form.personalEmail} onChange={(v) => setField('personalEmail', v)} />
-        <Field label="Nơi sinh" value={form.birthplace} onChange={(v) => setField('birthplace', v)} />
-        <Field label="Địa chỉ hiện tại" value={form.currentAddress} onChange={(v) => setField('currentAddress', v)} />
-        <Field label="Địa chỉ thường trú" value={form.permanentAddress} onChange={(v) => setField('permanentAddress', v)} />
-        <Field label="Ngân hàng" value={form.bankName} onChange={(v) => setField('bankName', v)} />
-        <Field label="Số tài khoản" value={form.bankAccountNumber} onChange={(v) => setField('bankAccountNumber', v)} />
+      <div className="space-y-5">
+        <Section
+          title="Thông tin cơ bản"
+          subtitle="Các trường nhận diện hồ sơ và thông tin công việc chính."
+        >
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <Field
+              label="Mã nhân viên"
+              value={form.code}
+              onChange={(v) => setField('code', v)}
+              placeholder="Nếu backend tự sinh có thể để trống"
+              disabled={mode === 'create'}
+            />
+            <Field label="Họ tên" value={form.name} onChange={(v) => setField('name', v)} />
+            <Field label="Giới tính" value={form.gender} onChange={(v) => setField('gender', v)} />
+            <Field
+              label="Ngày sinh"
+              value={form.dateOfBirth}
+              onChange={(v) => setField('dateOfBirth', v)}
+              placeholder="YYYY-MM-DD"
+            />
+            <Field
+              label="Probationary start"
+              value={form.probationaryStartDate}
+              onChange={(v) => setField('probationaryStartDate', v)}
+              placeholder="YYYY-MM-DD"
+            />
+            <Field
+              label="Probationary end"
+              value={form.probationaryEndDate}
+              onChange={(v) => setField('probationaryEndDate', v)}
+              placeholder="YYYY-MM-DD"
+            />
+            <Field
+              label="Official start"
+              value={form.officialStartDate}
+              onChange={(v) => setField('officialStartDate', v)}
+              placeholder="YYYY-MM-DD"
+            />
+            <Field label="Loại" value={form.type} onChange={(v) => setField('type', v)} />
+            <Field label="Level" value={form.level} onChange={(v) => setField('level', v)} />
+          </div>
+        </Section>
+
+        <Section
+          title="Học vấn và liên hệ"
+          subtitle="Thông tin học vấn, email và số điện thoại."
+        >
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <Field
+              label="Năm tốt nghiệp"
+              value={form.graduationYear}
+              onChange={(v) => setField('graduationYear', v)}
+            />
+            <Field
+              label="Học vấn"
+              value={form.education}
+              onChange={(v) => setField('education', v)}
+            />
+            <Field
+              label="Email công ty"
+              value={form.email}
+              onChange={(v) => setField('email', v)}
+            />
+            <Field
+              label="Email cá nhân"
+              value={form.personalEmail}
+              onChange={(v) => setField('personalEmail', v)}
+            />
+            <Field
+              label="Số điện thoại"
+              value={form.phoneNumber}
+              onChange={(v) => setField('phoneNumber', v)}
+            />
+            <Field
+              label="Nơi sinh"
+              value={form.birthplace}
+              onChange={(v) => setField('birthplace', v)}
+            />
+          </div>
+        </Section>
+
+        <Section
+          title="Thông tin giấy tờ và địa chỉ"
+          subtitle="Các trường nhận diện cá nhân và địa chỉ cư trú."
+        >
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <Field
+              label="Mã số thuế"
+              value={form.taxCode}
+              onChange={(v) => setField('taxCode', v)}
+            />
+            <Field
+              label="Mã BHXH"
+              value={form.socialInsuranceCode}
+              onChange={(v) => setField('socialInsuranceCode', v)}
+            />
+            <Field
+              label="CCCD"
+              value={form.citizenIdentificationCode}
+              onChange={(v) => setField('citizenIdentificationCode', v)}
+            />
+            <Field
+              label="Địa chỉ hiện tại"
+              value={form.currentAddress}
+              onChange={(v) => setField('currentAddress', v)}
+            />
+            <Field
+              label="Địa chỉ thường trú"
+              value={form.permanentAddress}
+              onChange={(v) => setField('permanentAddress', v)}
+            />
+          </div>
+        </Section>
+
+        <Section
+          title="Thông tin ngân hàng"
+          subtitle="Phục vụ quản lý tài khoản và thanh toán."
+        >
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <Field
+              label="Ngân hàng"
+              value={form.bankName}
+              onChange={(v) => setField('bankName', v)}
+            />
+            <Field
+              label="Số tài khoản"
+              value={form.bankAccountNumber}
+              onChange={(v) => setField('bankAccountNumber', v)}
+            />
+          </div>
+        </Section>
 
         {mode === 'create' ? (
-          <Field
-            label="Data password"
-            type="password"
-            value={form.dataPassword}
-            onChange={(v) => setField('dataPassword', v)}
-            placeholder="Bắt buộc khi tạo hồ sơ"
-          />
+          <Section
+            title="Thiết lập mã hóa"
+            subtitle="Data password sẽ được dùng khi tạo hồ sơ và mã hóa dữ liệu."
+          >
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              <Field
+                label="Data password"
+                type="password"
+                value={form.dataPassword}
+                onChange={(v) => setField('dataPassword', v)}
+                placeholder="Bắt buộc khi tạo hồ sơ"
+              />
+            </div>
+          </Section>
         ) : null}
       </div>
 
@@ -251,7 +374,7 @@ export default function EmployeeProfileForm({
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+          className="rounded-2xl bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:opacity-60"
         >
           {loading ? 'Đang xử lý...' : mode === 'create' ? 'Tạo hồ sơ' : 'Cập nhật hồ sơ'}
         </button>

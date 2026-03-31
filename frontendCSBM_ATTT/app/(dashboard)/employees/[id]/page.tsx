@@ -38,11 +38,11 @@ export default function EmployeeDetailPage() {
   }, [params?.id]);
 
   return (
-    <div>
-      <div className="mb-4">
+    <div className="space-y-6">
+      <div>
         <Link
           href="/employees"
-          className="inline-flex rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700"
+          className="inline-flex rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
         >
           ← Quay lại danh sách
         </Link>
@@ -54,7 +54,7 @@ export default function EmployeeDetailPage() {
       />
 
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-2xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">
           {error}
         </div>
       ) : null}

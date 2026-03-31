@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
+import { KeyRound, ShieldCheck } from 'lucide-react';
 import { employeeService } from '@/services/employee.service';
 import { getErrorMessage } from '@/lib/utils';
 import { getDataPassword, setDataPassword } from '@/lib/auth';
@@ -123,42 +123,75 @@ export default function SettingsPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageTitle
         title="Cài đặt"
-        subtitle="Nhập key để giải mã hồ sơ, sau đó mới cập nhật dữ liệu cá nhân"
+        subtitle="Quản lý key giải mã, cập nhật hồ sơ cá nhân và thay đổi data password."
       />
 
+      <div className="rounded-[28px] border border-sky-400/15 bg-[linear-gradient(135deg,rgba(14,165,233,0.12),rgba(15,23,42,0.6)_45%,rgba(15,23,42,0.94))] p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">
+              <ShieldCheck size={14} />
+              Profile Security
+            </div>
+            <h2 className="mt-4 text-xl font-semibold text-white">
+              Khu vực cấu hình bảo mật hồ sơ
+            </h2>
+            <p className="mt-2 text-sm leading-7 text-slate-300">
+              Nhập đúng key để tải dữ liệu thật, sau đó mới chỉnh sửa thông tin cá nhân
+              hoặc xoay vòng data password.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+            <p className="text-xs uppercase tracking-wide text-slate-500">
+              Key status
+            </p>
+            <p className="mt-2 text-sm font-semibold text-white">
+              {currentDataPassword ? 'Ready for use' : 'Missing'}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {!currentDataPassword ? (
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+        <div className="rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-300">
           Chưa có key giải mã đang dùng. Hồ sơ có thể đang hiển thị dạng ****.
         </div>
       ) : (
-        <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+        <div className="rounded-2xl border border-sky-400/20 bg-sky-400/10 px-4 py-3 text-sm text-sky-300">
           Đã có key giải mã trên trình duyệt. Bạn có thể bấm giải mã lại hồ sơ bất cứ lúc nào.
         </div>
       )}
 
       {error ? (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-2xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">
           {error}
         </div>
       ) : null}
 
       {success ? (
-        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+        <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-300">
           {success}
         </div>
       ) : null}
 
-      <div className="mb-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-slate-900">
-          Giải mã dữ liệu hồ sơ
-        </h2>
+      <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
+        <div className="mb-5">
+          <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">
+            <KeyRound size={14} />
+            Unlock Profile Data
+          </div>
+          <h2 className="mt-4 text-xl font-semibold text-white">
+            Giải mã dữ liệu hồ sơ
+          </h2>
+        </div>
 
         <div className="flex flex-col gap-3 md:flex-row md:items-end">
           <div className="w-full max-w-md">
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-slate-300">
               Data password
             </label>
             <input
@@ -166,21 +199,22 @@ export default function SettingsPage() {
               value={dataPasswordInput}
               onChange={(e) => setDataPasswordInput(e.target.value)}
               placeholder="Nhập key để hiển thị dữ liệu thật"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500 focus:border-sky-400/50"
             />
           </div>
 
           <button
             onClick={handleUnlockProfile}
             disabled={unlockingProfile}
-            className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+            className="rounded-2xl bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:opacity-60"
           >
             {unlockingProfile ? 'Đang giải mã...' : 'Giải mã dữ liệu'}
           </button>
         </div>
 
-        <p className="mt-3 text-sm text-slate-500">
-          Nhập đúng key rồi bấm nút này để tải lại hồ sơ đã giải mã. Sau đó mới chỉnh sửa và cập nhật.
+        <p className="mt-3 text-sm leading-7 text-slate-400">
+          Nhập đúng key rồi bấm nút này để tải lại hồ sơ đã giải mã. Sau đó mới chỉnh sửa
+          và cập nhật.
         </p>
       </div>
 
@@ -202,13 +236,13 @@ export default function SettingsPage() {
           />
         </div>
       ) : (
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-600">
+        <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.18)]">
+          <p className="text-sm leading-7 text-slate-300">
             Tài khoản này chưa có hồ sơ cá nhân. Hãy vào trang tạo hồ sơ trước.
           </p>
           <a
             href="/employees/create"
-            className="mt-4 inline-block rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
+            className="mt-4 inline-flex rounded-2xl bg-sky-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
           >
             Tạo hồ sơ ngay
           </a>

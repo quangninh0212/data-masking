@@ -2,17 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #08111f;
+  --bg-soft: #0d1728;
+  --panel: rgba(14, 23, 38, 0.88);
+  --panel-strong: #111c2f;
+  --border: rgba(148, 163, 184, 0.16);
+  --text: #e5eefc;
+  --text-soft: #94a3b8;
+  --primary: #38bdf8;
+  --primary-strong: #0ea5e9;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+}
+
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #f8fafc;
-  color: #0f172a;
+  min-height: 100%;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 28%),
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 22%),
+    linear-gradient(180deg, #07101d 0%, #0a1322 45%, #0b1424 100%);
+  color: var(--text);
+}
+
+body {
+  background-attachment: fixed;
 }
 
 * {
   box-sizing: border-box;
+}
+
+*::selection {
+  background: rgba(56, 189, 248, 0.28);
+  color: #ffffff;
 }
 
 a {
@@ -30,9 +58,78 @@ textarea {
 input,
 select,
 textarea {
-  background: white;
+  background: rgba(15, 23, 42, 0.92);
+  color: var(--text);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #64748b;
 }
 
 table {
   border-collapse: collapse;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b1320;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.45);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.65);
+}
+
+.app-shell-bg {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(56, 189, 248, 0.08), transparent 25%),
+    radial-gradient(circle at 100% 10%, rgba(59, 130, 246, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(10, 18, 33, 0.96), rgba(8, 17, 31, 0.98));
+}
+
+.panel-dark {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(14px);
+}
+
+.panel-dark-strong {
+  background: var(--panel-strong);
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+}
+
+.text-muted {
+  color: var(--text-soft);
+}
+
+.title-glow {
+  text-shadow: 0 0 18px rgba(56, 189, 248, 0.18);
+}
+
+.grid-pattern {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
 }

@@ -4,10 +4,10 @@ type Props = {
 };
 
 const styles = {
-  success: 'border-green-200 bg-green-50 text-green-700',
-  error: 'border-red-200 bg-red-50 text-red-600',
-  warning: 'border-amber-200 bg-amber-50 text-amber-700',
-  info: 'border-blue-200 bg-blue-50 text-blue-700',
+  success: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+  error: 'border-red-400/20 bg-red-400/10 text-red-300',
+  warning: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
+  info: 'border-sky-400/20 bg-sky-400/10 text-sky-300',
 };
 
 export default function StatusAlert({
@@ -15,7 +15,7 @@ export default function StatusAlert({
   message,
 }: Props) {
   return (
-    <div className={`rounded-xl border px-4 py-3 text-sm ${styles[type]}`}>
+    <div className={`rounded-2xl border px-4 py-3 text-sm ${styles[type]}`}>
       {message}
     </div>
   );

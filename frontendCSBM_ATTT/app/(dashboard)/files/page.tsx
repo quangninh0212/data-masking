@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { FolderLock } from 'lucide-react';
 import { fileService } from '@/services/file.service';
 import { getErrorMessage } from '@/lib/utils';
 import { getDataPassword, setDataPassword } from '@/lib/auth';
@@ -237,35 +238,67 @@ export default function FilesPage() {
     <div className="space-y-6">
       <PageTitle
         title="Quản lý tệp tin"
-        subtitle="Upload, xem danh sách, xem nội dung, giải mã, tải xuống và xóa file của bạn"
+        subtitle="Upload, xem nội dung, giải mã, tải xuống và quản trị vòng đời file an toàn."
       />
 
+      <div className="rounded-[28px] border border-violet-400/15 bg-[linear-gradient(135deg,rgba(139,92,246,0.14),rgba(15,23,42,0.62)_42%,rgba(15,23,42,0.94))] p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-violet-400/20 bg-violet-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-violet-300">
+              <FolderLock size={14} />
+              Secure File Vault
+            </div>
+            <h2 className="mt-4 text-xl font-semibold text-white">
+              Trung tâm tệp tin mã hóa
+            </h2>
+            <p className="mt-2 text-sm leading-7 text-slate-300">
+              Thực hiện upload, xem metadata, mở nội dung, giải mã và tải file với
+              data password đã lưu trên trình duyệt.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4">
+            <p className="text-xs uppercase tracking-wide text-slate-500">
+              Data password status
+            </p>
+            <p className="mt-2 text-sm font-semibold text-white">
+              {dataPassword ? 'Saved in browser' : 'Not available'}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {dataPassword ? (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+        <div className="rounded-2xl border border-sky-400/20 bg-sky-400/10 px-4 py-3 text-sm text-sky-300">
           Đang dùng data password đã lưu trên trình duyệt.
         </div>
       ) : (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-          Chưa có data password lưu trên trình duyệt. Upload, xem nội dung, decrypt và download sẽ cần nhập password này.
+        <div className="rounded-2xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-sm text-amber-300">
+          Chưa có data password lưu trên trình duyệt. Upload, xem nội dung, decrypt
+          và download sẽ cần nhập password này.
         </div>
       )}
 
       {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-2xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">
           {error}
         </div>
       ) : null}
 
       {success ? (
-        <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+        <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-300">
           {success}
         </div>
       ) : null}
 
       {decryptResult ? (
-        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          <p className="font-medium">{decryptResult.message || 'Decrypt success'}</p>
-          <p className="mt-1 break-all">Output path: {decryptResult.outputPath}</p>
+        <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-300">
+          <p className="font-semibold">
+            {decryptResult.message || 'Decrypt success'}
+          </p>
+          <p className="mt-1 break-all text-slate-200">
+            Output path: {decryptResult.outputPath}
+          </p>
         </div>
       ) : null}
 

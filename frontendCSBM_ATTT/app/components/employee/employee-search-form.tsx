@@ -51,13 +51,24 @@ export default function EmployeeSearchForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mb-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+      className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
     >
+      <div className="mb-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          Filters
+        </p>
+        <h2 className="mt-2 text-xl font-semibold text-white">
+          Bộ lọc tìm kiếm nhân viên
+        </h2>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div>
-          <label className="mb-1 block text-sm font-medium">Mã nhân viên</label>
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            Mã nhân viên
+          </label>
           <input
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500 focus:border-sky-400/50"
             value={form.code || ''}
             onChange={(e) => handleChange('code', e.target.value)}
             placeholder="VD: NV001"
@@ -65,9 +76,11 @@ export default function EmployeeSearchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Tên</label>
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            Tên
+          </label>
           <input
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500 focus:border-sky-400/50"
             value={form.name || ''}
             onChange={(e) => handleChange('name', e.target.value)}
             placeholder="Nhập tên"
@@ -75,9 +88,11 @@ export default function EmployeeSearchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Giới tính</label>
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            Giới tính
+          </label>
           <input
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500 focus:border-sky-400/50"
             value={form.gender || ''}
             onChange={(e) => handleChange('gender', e.target.value)}
             placeholder="Nam / Nữ"
@@ -85,29 +100,35 @@ export default function EmployeeSearchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Loại</label>
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            Loại
+          </label>
           <input
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500 focus:border-sky-400/50"
             value={form.type || ''}
             onChange={(e) => handleChange('type', e.target.value)}
-            placeholder="Intern / Official..."
+            placeholder="Intern / Official"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Level</label>
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            Level
+          </label>
           <input
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500 focus:border-sky-400/50"
             value={form.level || ''}
             onChange={(e) => handleChange('level', e.target.value)}
-            placeholder="Junior / Senior..."
+            placeholder="Junior / Senior"
           />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Học vấn</label>
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            Học vấn
+          </label>
           <input
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500 focus:border-sky-400/50"
             value={form.education || ''}
             onChange={(e) => handleChange('education', e.target.value)}
             placeholder="Đại học..."
@@ -115,9 +136,11 @@ export default function EmployeeSearchForm({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium">Năm tốt nghiệp</label>
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            Năm tốt nghiệp
+          </label>
           <input
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500 focus:border-sky-400/50"
             value={form.graduationYear || ''}
             onChange={(e) => handleChange('graduationYear', e.target.value)}
             placeholder="2024"
@@ -125,11 +148,11 @@ export default function EmployeeSearchForm({
         </div>
       </div>
 
-      <div className="mt-4 flex gap-3">
+      <div className="mt-5 flex flex-wrap gap-3">
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          className="rounded-2xl bg-sky-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:opacity-60"
         >
           {loading ? 'Đang tìm...' : 'Tìm kiếm'}
         </button>
@@ -137,7 +160,7 @@ export default function EmployeeSearchForm({
         <button
           type="button"
           onClick={handleReset}
-          className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700"
+          className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
         >
           Đặt lại
         </button>

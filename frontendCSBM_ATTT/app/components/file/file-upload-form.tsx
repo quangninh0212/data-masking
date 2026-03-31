@@ -66,31 +66,40 @@ export default function FileUploadForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+      className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
     >
-      <h2 className="mb-5 text-lg font-semibold text-slate-900">Upload file mã hóa</h2>
+      <div className="mb-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+          Upload
+        </p>
+        <h2 className="mt-2 text-xl font-semibold text-white">
+          Upload file mã hóa
+        </h2>
+      </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-medium text-slate-300">
             Chọn file
           </label>
           <input
             type="file"
             accept=".txt,.json,.csv,.xml,.md,text/plain,application/json,text/csv,application/xml,text/xml,text/markdown"
             onChange={(e) => handleFileChange(e.target.files?.[0] || null)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-200"
           />
           <p className="mt-2 text-xs text-slate-500">
             Chỉ hỗ trợ: .txt, .json, .csv, .xml, .md
           </p>
           {selectedFile ? (
-            <p className="mt-2 text-xs text-slate-500">{selectedFile.name}</p>
+            <p className="mt-2 text-sm font-medium text-slate-300">
+              {selectedFile.name}
+            </p>
           ) : null}
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-2 block text-sm font-medium text-slate-300">
             Data password
           </label>
           <input
@@ -98,13 +107,13 @@ export default function FileUploadForm({
             value={dataPassword}
             onChange={(e) => setDataPassword(e.target.value)}
             placeholder="Nhập data password để mã hóa file"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2"
+            className="w-full rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500 focus:border-violet-400/50"
           />
         </div>
       </div>
 
       {error ? (
-        <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="mt-4 rounded-2xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">
           {error}
         </div>
       ) : null}
@@ -113,7 +122,7 @@ export default function FileUploadForm({
         <button
           type="submit"
           disabled={loading || !selectedFile}
-          className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+          className="rounded-2xl bg-violet-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-400 disabled:opacity-60"
         >
           {loading ? 'Đang upload...' : 'Upload file'}
         </button>

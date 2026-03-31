@@ -38,20 +38,28 @@ export default function CreateEmployeePage() {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageTitle
         title="Tạo hồ sơ nhân viên"
-        subtitle="Tạo hồ sơ cá nhân cho tài khoản đang đăng nhập"
+        subtitle="Thiết lập hồ sơ cá nhân cho tài khoản đang đăng nhập và cấu hình data password ban đầu."
       />
 
+      <div className="rounded-[28px] border border-emerald-400/15 bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(15,23,42,0.62)_45%,rgba(15,23,42,0.94))] p-5">
+        <h2 className="text-xl font-semibold text-white">Khởi tạo hồ sơ cá nhân</h2>
+        <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-300">
+          Sau khi tạo hồ sơ thành công, data password sẽ được lưu lại trên trình duyệt
+          để sử dụng cho các bước giải mã và cập nhật về sau.
+        </p>
+      </div>
+
       {error ? (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-2xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">
           {error}
         </div>
       ) : null}
 
       {success ? (
-        <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+        <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-300">
           {success}
         </div>
       ) : null}
